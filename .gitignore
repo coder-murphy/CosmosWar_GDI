@@ -1,0 +1,12 @@
+bin/
+obj/
+.vs/
+*.bin
+packages/
+res/
+release/
+workplan.txt
+app.ico
+Resources/
+Palette.txt
+data/
