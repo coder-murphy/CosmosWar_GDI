@@ -107,6 +107,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AIScripts\AIBase.cs" />
+    <Compile Include="AIScripts\AICommon.cs" />
+    <Compile Include="AIScripts\AIPool.cs" />
     <Compile Include="Anime.cs" />
     <Compile Include="AreaPanel.cs" />
     <Compile Include="CWMath.cs" />

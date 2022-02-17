@@ -41,8 +41,17 @@ namespace CosmosWar
         /// <returns></returns>
         public byte this[int x, int y]
         {
-            get => matrix[y, x];
-            set => matrix[y, x] = value;
+            get
+            {
+                if (x < 0 || x >= width || y < 0 || y >= height)
+                    return 0;
+                return matrix[y, x];
+            }
+            set
+            {
+                if(x >= 0 && y >= 0 && x < width && y < height)
+                    matrix[y, x] = value;
+            }
         }
 
         /// <summary>

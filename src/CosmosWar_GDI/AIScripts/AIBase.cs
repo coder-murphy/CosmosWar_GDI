@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace CosmosWar.AIScripts
@@ -22,6 +23,7 @@ namespace CosmosWar.AIScripts
             Name = name;
             Version = version;
             Description = description;
+            force = "R";
         }
 
         public string Name { get; set; }
@@ -29,6 +31,10 @@ namespace CosmosWar.AIScripts
         public string Version { get; set; }
 
         public string Description { get; set; }
+        /// <summary>
+        /// AI阵营
+        /// </summary>
+        public string Force => force;
 
         /// <summary>
         /// 注册回合开始金钱逻辑
@@ -76,15 +82,60 @@ namespace CosmosWar.AIScripts
         /// 回合开始行为
         /// </summary>
         /// <param name="money"></param>
-        public void RoundBeginBehaviour(int money)
+        public void RoundBeginBehaviour(ref int money)
         {
             moneyBehaviourRoundBegin?.Invoke(money);
         }
+
+        /// <summary>
+        /// 发动单位选择
+        /// </summary>
+        public void DoSelectUnit()
+        {
+            Console.WriteLine("电脑选取单位");
+            Task.Run(() => {
+                var ownUnits = Scene.Instance.Units.Where(x => x.Force == force && !x.IsHome && x.IsThisRoundMoved == false);
+                if (ownUnits.Count() == 0)
+                    return;
+                var ownUnit = unitsSelector?.Invoke(ownUnits);
+                if(ownUnit.IsFactory)
+                {
+                    //Scene.Instance.GoldR
+                    var canBuildUnits = Scene.Instance.ManufactureUnitTypesR.Where(x => x.Cost <= Scene.Instance.GoldR);
+                    if(canBuildUnits.Count() == 0)
+                    {
+                        Scene.Instance.OrderFactoryBuildUnit(ownUnit, null);
+                    }
+                    else
+                    {
+                        var bUnit = canBuildUnits.OrderByDescending(x => x.Cost).FirstOrDefault();
+                        Scene.Instance.OrderFactoryBuildUnit(ownUnit, bUnit);
+                    }
+                }
+                else
+                {
+                    Scene.Instance.MoveSelectBoxToTarget(ownUnit.GridLocX, ownUnit.GridLocY);
+                    // 获取敌方单位
+                    var enemys = Scene.Instance.Units.Where(x => x.Force != force && x.IsFactory == false);
+                    Unit priorityUnit = enemys.OrderByDescending(x => enemyUnitPriorityCondition?.Invoke(x, ownUnit)).FirstOrDefault();
+                    if (priorityUnit == null)
+                        return;
+                    var moveGrids = CWMath.GetUnitRoundTiles(ownUnit);
+                    Thread.Sleep(1000);
+                    var p = CWMath.GetNearLocInMoveGrids(moveGrids, priorityUnit.GridLocX, priorityUnit.GridLocY);
+                    Console.WriteLine($"AI获取近点：{p}");
+                    Scene.Instance.MoveSelectBoxToTarget((byte)p.X, (byte)p.Y);
+                    Game.Animes.MoveUnit(ownUnit, (byte)p.X, (byte)p.Y);
+                }
+            });
+        }
+
         #endregion
         private Behaviour<int> moneyBehaviourRoundBegin = null;
         private EqualsCondition<Unit,Unit> enemyUnitPriorityCondition = null;
         private ConvertBehaviour<IEnumerable<Unit>, Unit> unitsSelector = null;
         private AIFactoryBuildStrategy aIFactoryBuildStrategy = AIFactoryBuildStrategy.Normal;
+        private string force;
     }
 
     /// <summary>

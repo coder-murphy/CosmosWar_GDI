@@ -127,6 +127,20 @@ namespace CosmosWar
         }
 
         /// <summary>
+        /// 获取可移动区域中与目标点最近的位置
+        /// </summary>
+        /// <param name="moveGrids"></param>
+        /// <param name="gridLocX"></param>
+        /// <param name="gridLocY"></param>
+        /// <returns></returns>
+        /// <exception cref="NotImplementedException"></exception>
+        internal static Point GetNearLocInMoveGrids(IEnumerable<Point> moveGrids, byte gridLocX, byte gridLocY)
+        {
+            if (moveGrids.Count() == 0) return default;
+            return  moveGrids.OrderBy(x => Math.Abs(x.X - gridLocX) + Math.Abs(x.Y - gridLocY)).First();
+        }
+
+        /// <summary>
         /// 根据基础攻击
         /// </summary>
         /// <param name="baseDamage"></param>

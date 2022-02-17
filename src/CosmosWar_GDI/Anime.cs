@@ -51,6 +51,10 @@ namespace CosmosWar
                             //Logger.Log($"移动单位{movingUnit}至{p}");
                             movingUnit.GridLocX = (byte)p.X;
                             movingUnit.GridLocY = (byte)p.Y;
+                            if(movingUnit.Force == Scene.CurrentAI.Force)
+                            {
+                                Scene.Instance.FocusTo(movingUnit.GridLocX, movingUnit.GridLocY);
+                            }
                         }
                         else
                         {

@@ -80,6 +80,16 @@ namespace CosmosWar
         public Unit[] Units => sceneUnits.Where(x => !x.IsHome).ToArray();
 
         /// <summary>
+        /// 工厂可建造的红方单位
+        /// </summary>
+        public IEnumerable<Unit> ManufactureUnitTypesR => manufactureUnitTypesR;
+
+        /// <summary>
+        /// 工厂可建造的蓝方单位
+        /// </summary>
+        public IEnumerable<Unit> ManufactureUnitTypesB => manufactureUnitTypesB;
+
+        /// <summary>
         /// 读取地图
         /// </summary>
         /// <param name="map"></param>
@@ -91,13 +101,17 @@ namespace CosmosWar
             Logger.Log($"读取地图配置 地图名：{currentMap.MapName}");
             var setting = Define.GetMapSetting(currentMap.MapName);
             if (!string.IsNullOrWhiteSpace(setting))
+            {
                 LoadMapSetting(setting);
+                LoadAI(AIPool.Instance["m_AIContext"]);
+            }
+
             return true;
         }
 
         public void GetKeyDown(Keys keyCode, out bool renderFlag)
         {
-            if (Game.AllowKeyEvent == false)
+            if (Game.AllowKeyEvent == false || isHumanRound == false)
             {
                 renderFlag = true;
                 return;
@@ -527,6 +541,51 @@ namespace CosmosWar
         public void LoadAI(AIBase ai)
         {
             currentAI = ai;
+        }
+
+        /// <summary>
+        /// 摄像机跳转到目标点
+        /// </summary>
+        /// <param name="locX"></param>
+        /// <param name="locY"></param>
+        public void FocusTo(byte locX,byte locY)
+        {
+            if(locX >= 0 && locX <= ScreenGridMaxWidth / 2)
+            {
+                currentScreenGridLeft = 0;
+            }
+            else if(locX >= CurrentMapSize.Width - ScreenGridMaxWidth / 2 && locX <= CurrentMapSize.Width - 1)
+            {
+                currentScreenGridLeft = (byte)(CurrentMapSize.Width - ScreenGridMaxWidth);
+            }
+            else
+            {
+                currentScreenGridLeft = (byte)(locX - ScreenGridMaxWidth / 2);
+            }
+            if (locY >= 0 && (locY <= ScreenGridMaxHeight / 2))
+            {
+                currentScreenGridTop = 0;
+            }
+            else if (locY >= CurrentMapSize.Height - ScreenGridMaxHeight / 2 && (locY <= CurrentMapSize.Height - 1))
+            {
+                currentScreenGridTop = (byte)(CurrentMapSize.Height - ScreenGridMaxHeight);
+            }
+            else
+            {
+                currentScreenGridTop = (byte)(locY - ScreenGridMaxHeight / 2);
+            }
+        }
+
+        /// <summary>
+        /// 移动选择框至指定区域
+        /// </summary>
+        /// <param name="locX"></param>
+        /// <param name="locY"></param>
+        public void MoveSelectBoxToTarget(byte locX,byte locY)
+        {
+            FocusTo(locX, locY);
+            currentScreenTargetTileX = (byte)(locX - currentScreenGridLeft);
+            currentScreenTargetTileY = (byte)(locY - currentScreenGridTop);
         }
 
         internal void Run()
@@ -1124,7 +1183,7 @@ namespace CosmosWar
         /// </summary>
         /// <param name="src"></param>
         /// <param name="dst"></param>
-        private void AttackUnitNormal(Unit src,Unit dst)
+        public void AttackUnitNormal(Unit src,Unit dst)
         {
             int dmg = CWMath.GetDamage(src.Damage, dst.Armor, 0.8f, src.Level, dst.Level);
             dst.Life -= dmg;
@@ -1167,9 +1226,9 @@ namespace CosmosWar
                 int count = 0;
                 int movedUnitCount = 0;
                 string tokenForce = isHumanRound ? "B" : "R";
-                IEnumerable<Unit> unitList = sceneUnits.Where(x => x.Force == tokenForce);
+                IEnumerable<Unit> unitList = sceneUnits.Where(x => x.Force == tokenForce && !x.IsHome);
                 count = unitList.Count();
-                movedUnitCount = unitList.Where(x => x.IsThisRoundMoved && !x.IsHome).Count();
+                movedUnitCount = unitList.Where(x => x.IsThisRoundMoved).Count();
                 if (movedUnitCount == count)
                 {
                     SetUnitPropertiesShown(null, false);
@@ -1179,8 +1238,18 @@ namespace CosmosWar
                     }
                     GoldB += 500;
                     GoldR += 500;
-                    isHumanRound = !isHumanRound;
+                    isHumanRound = isHumanRound != true;
+                    var g = GoldR;
+                    currentAI?.RoundBeginBehaviour(ref g);
+                    GoldR = g;
+                    if(isHumanRound == false)
+                    {
+                        Console.WriteLine("轮次换为电脑出战");
+                        currentAI?.DoSelectUnit();
+                    }
                 }
+                if (isHumanRound == false && movedUnitCount != count)
+                    currentAI?.DoSelectUnit();
                 ShowMoveGrids = true;
             });
         }
@@ -1202,28 +1271,46 @@ namespace CosmosWar
         }
 
         /// <summary>
-        /// 命令工厂建造单位
+        /// 命令工厂建造单位(AI需要填参数)
         /// </summary>
-        private void OrderFactoryBuildUnit()
+        /// <param name="aiBuildUnit"></param>
+        /// <param name="factory"></param>
+        public void OrderFactoryBuildUnit(Unit factory = null,Unit aiBuildUnit = null)
         {
             Task.Run(() =>
             {
                 int money = isHumanRound ? GoldB : GoldR;
-                Unit mU = currentSelectedManufactureUnit;
-                if(money < mU.Cost)
+                Unit mU = null;
+                if (isHumanRound)
                 {
-                    Game.SetWarningMessage("你没有足够的金钱\r\n来建造单位。", 2);
-                    return;
-                }
-                if(isHumanRound)
-                {
+                    mU = currentSelectedManufactureUnit;
+                    if (money < mU.Cost)
+                    {
+                        Game.SetWarningMessage("你没有足够的金钱\r\n来建造单位。", 2);
+                        return;
+                    }
                     GoldB -= mU.Cost;
+                }
+                else if (factory != null)
+                {
+                    if(aiBuildUnit != null)
+                    {
+                        mU = aiBuildUnit;
+                        GoldR -= mU.Cost;
+                    }
+                    else
+                    {
+                        factory.IsThisRoundMoved = true;
+                        SetFactoryModeDisabled();
+                        CheckRoundEnd();
+                        return;
+                    }
                 }
                 else
                 {
-                    GoldR -= mU.Cost;
+                    return;
                 }
-                Unit dU = currentSelectedUnit.unit;
+                Unit dU = isHumanRound ? currentSelectedUnit.unit : factory;
                 int index = currentManufactureUnitIndex;
                 dU.IsThisRoundMoved = true; //测试期间移除
                 Unit nU = Unit.Clone(mU);
@@ -1354,17 +1441,6 @@ namespace CosmosWar
             /// </summary>
             public bool IsActiveUnit { get; internal set; }
         }
-    }
-
-    /// <summary>
-    /// 卷轴滚动方向
-    /// </summary>
-    public enum ScrollDirection
-    {
-        Left = 0,
-        Right = 1,
-        Up = 2,
-        Down = 3,
     }
 
     /// <summary>
