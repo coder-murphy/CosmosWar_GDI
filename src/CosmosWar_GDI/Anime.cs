@@ -75,7 +75,7 @@ namespace CosmosWar
         {
             // 判断目标区域是否有单位
             var tU = Scene.Instance.FindUnit(dstLocX, dstLocY);
-            if (tU != null && !tU.IsFactory && !tU.IsHome && tU.Force == u.Force && !(tU.Equals(u)))
+            if (tU != null && !tU.IsFactory && !tU.IsHome && tU.Force == u.Force && !tU.Equals(u) && Scene.IsHumanRound)
             {
                 Game.SetWarningMessage("无法移动到该目标位置", 2);
                 return;

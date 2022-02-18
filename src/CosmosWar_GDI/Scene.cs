@@ -111,7 +111,7 @@ namespace CosmosWar
 
         public void GetKeyDown(Keys keyCode, out bool renderFlag)
         {
-            if (Game.AllowKeyEvent == false || isHumanRound == false)
+            if (Game.AllowKeyEvent == false)
             {
                 renderFlag = true;
                 return;
@@ -162,6 +162,11 @@ namespace CosmosWar
             #region directions
             else if (keyCode == Keys.Left || keyCode == Keys.A)
             {
+                if (isHumanRound == false)
+                {
+                    renderFlag = true;
+                    return;
+                }
                 if(!isGameMenuShowing)
                 {
                     isDirKey = true;
@@ -232,6 +237,11 @@ namespace CosmosWar
                 if (!isGameMenuShowing)
                 {
                     isDirKey = true;
+                    if (isHumanRound == false)
+                    {
+                        renderFlag = true;
+                        return;
+                    }
                     if (isUnitCommandPanelShowing && currentSelectedUnit.unit.Force == OurForce && !isUnitMoving)
                     {
 
@@ -282,6 +292,11 @@ namespace CosmosWar
             }
             else if (keyCode == Keys.Right || keyCode == Keys.D)
             {
+                if (isHumanRound == false)
+                {
+                    renderFlag = true;
+                    return;
+                }
                 if (!isGameMenuShowing)
                 {
                     isDirKey = true;
@@ -349,6 +364,11 @@ namespace CosmosWar
                 }
                 if (!isGameMenuShowing)
                 {
+                    if (isHumanRound == false)
+                    {
+                        renderFlag = true;
+                        return;
+                    }
                     isDirKey = true;
                     if (isUnitCommandPanelShowing && currentSelectedUnit.unit.Force == OurForce && !isUnitMoving)
                     {
@@ -402,7 +422,12 @@ namespace CosmosWar
             {
                 if (!isGameMenuShowing)
                 {
-                    if(isFactoryRunning)
+                    if (isHumanRound == false)
+                    {
+                        renderFlag = true;
+                        return;
+                    }
+                    if (isFactoryRunning)
                     {
                         if(currentSelectedUnit.unit.Force == OurForce)
                             if (!currentSelectedUnit.unit.IsThisRoundMoved)
@@ -431,14 +456,12 @@ namespace CosmosWar
                         //currentUnitAction = 0;
                         if (currentSelectedUnit.unit.Force == OurForce && !isFactoryRunning && !currentSelectedUnit.unit.IsThisRoundMoved)
                         {
-                            isUnitOrdering = true;
                             OrderUnit(currentUnitAction);
                             isUnitCommandPanelShowing = false;
                         }
                         else
                         {
                             isUnitCommandPanelShowing = false;
-                            isUnitOrdering = false;
                             isUnitMoving = false;
                             isUnitCasting = false;
                             //isUnitSelected = false;
@@ -451,7 +474,12 @@ namespace CosmosWar
             }
             else if ((keyCode == Keys.NumPad1 || keyCode == Keys.J) && !isVictory) //取消生产
             {
-                if(isFactoryRunning)
+                if (isHumanRound == false)
+                {
+                    renderFlag = true;
+                    return;
+                }
+                if (isFactoryRunning)
                 {
                     SetFactoryModeDisabled();
                 }
@@ -460,7 +488,6 @@ namespace CosmosWar
             {
                 if(currentSelectedUnit.unit.Force != OurForce)
                 {
-                    isUnitOrdering = false;
                     isUnitMoving = false;
                     isUnitCasting = false;
                     isUnitSelected = false;
@@ -469,7 +496,6 @@ namespace CosmosWar
             if (unFocusUnitFlag)
             {
                 isUnitSelected = false;
-                isUnitOrdering = false;
                 isUnitMoving = false;
                 isUnitCasting = false;
                 isUnitSelected = false;
@@ -1002,7 +1028,6 @@ namespace CosmosWar
             {
                 currentUnitAction = 0;
                 isUnitCommandPanelShowing = false;
-                isUnitOrdering = false;
             }
             //isGameMenuShowing = false;
         }
@@ -1025,7 +1050,6 @@ namespace CosmosWar
             isGameMenuShowing = false;
             isUnitMoving = false;
             currentUnitAction = 0;
-            isUnitOrdering = false;
             isUnitSelected = false;
             Game.AllowKeyEvent = true;
             SetUnitPropertiesShown(null, false);
@@ -1134,7 +1158,6 @@ namespace CosmosWar
             ShowMoveGrids = true;
             Anime.AnimeFinished += (u, type) =>
             {
-                isUnitOrdering = false;
                 isUnitSelected = false;
                 currentSelectedUnit.shown = false;
                 isUnitMoving = false;
@@ -1171,6 +1194,16 @@ namespace CosmosWar
                                 AttackUnitNormal(currentSelectedUnit.unit, tUnits.First());
                             }
                             dur = 3;
+                        }
+                        else
+                        {
+                            // 工厂覆盖检测
+                            Unit factory = sceneUnits.FirstOrDefault(x => x.IsFactory && u.Force == x.Force && x.GridLocX == u.GridLocX && x.GridLocY == u.GridLocY);
+                            if (factory != null)
+                            {
+                                //如果工厂被压住了则工厂本回合不再生产
+                                factory.IsThisRoundMoved = true;
+                            }
                         }
                         CheckRoundEnd(dur);
                         break;
@@ -1232,24 +1265,32 @@ namespace CosmosWar
                 if (movedUnitCount == count)
                 {
                     SetUnitPropertiesShown(null, false);
+                    GoldB += 300;
+                    GoldR += 300;
+                    if (isHumanRound)
+                    {
+                        var g = GoldR;
+                        currentAI?.RoundBeginBehaviour(ref g);
+                        GoldR = g;
+                        Console.WriteLine("轮次换为电脑出战");
+                        currentAI?.DoSelectUnit();
+                    }
+                    else
+                    {
+                        SetUnitPropertiesShown(null, false);
+                        Console.WriteLine("轮次换为玩家出战");
+                    }
                     foreach (var unit in unitList)
                     {
                         unit.IsThisRoundMoved = false;
                     }
-                    GoldB += 500;
-                    GoldR += 500;
                     isHumanRound = isHumanRound != true;
-                    var g = GoldR;
-                    currentAI?.RoundBeginBehaviour(ref g);
-                    GoldR = g;
-                    if(isHumanRound == false)
-                    {
-                        Console.WriteLine("轮次换为电脑出战");
-                        currentAI?.DoSelectUnit();
-                    }
                 }
-                if (isHumanRound == false && movedUnitCount != count)
-                    currentAI?.DoSelectUnit();
+                else
+                {
+                    if (isHumanRound == false) 
+                        currentAI?.DoSelectUnit();
+                }
                 ShowMoveGrids = true;
             });
         }
@@ -1259,7 +1300,6 @@ namespace CosmosWar
         /// </summary>
         private void SetFactoryModeDisabled()
         {
-            isUnitOrdering = false;
             isUnitSelected = false;
             currentSelectedUnit.shown = false;
             isUnitMoving = false;
@@ -1371,9 +1411,13 @@ namespace CosmosWar
         private float cBottom => csh - 10f;
         private float cSpLeft => csw - 240f;
 
+        /// <summary>
+        /// 是否为玩家回合
+        /// </summary>
+        public static bool IsHumanRound => Instance.isHumanRound;
+
         // =====Units=====
         private static bool isUnitSelected = false;
-        private static bool isUnitOrdering = false;
         private static readonly List<Unit> sceneUnits = new List<Unit>();
         private static byte rCount = 0;
         private static byte bCount = 0;

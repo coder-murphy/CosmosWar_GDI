@@ -98,7 +98,8 @@ namespace CosmosWar.AIScripts
                 if (ownUnits.Count() == 0)
                     return;
                 var ownUnit = unitsSelector?.Invoke(ownUnits);
-                if(ownUnit.IsFactory)
+                Scene.Instance.SetUnitPropertiesShown(ownUnit, true);
+                if (ownUnit.IsFactory)
                 {
                     //Scene.Instance.GoldR
                     var canBuildUnits = Scene.Instance.ManufactureUnitTypesR.Where(x => x.Cost <= Scene.Instance.GoldR);
@@ -121,6 +122,10 @@ namespace CosmosWar.AIScripts
                     if (priorityUnit == null)
                         return;
                     var moveGrids = CWMath.GetUnitRoundTiles(ownUnit);
+                    foreach(var i in moveGrids)
+                    {
+                        Console.WriteLine(i);
+                    }
                     Thread.Sleep(1000);
                     var p = CWMath.GetNearLocInMoveGrids(moveGrids, priorityUnit.GridLocX, priorityUnit.GridLocY);
                     Console.WriteLine($"AI获取近点：{p}");
