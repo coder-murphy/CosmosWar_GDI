@@ -189,6 +189,12 @@
     </Content>
     <Content Include="mapsettingsyntax.txt" />
     <Content Include="Palette.txt" />
+    <None Include="Resources\map2.txt" />
+    <None Include="Resources\Area4.setting.txt" />
+    <None Include="Resources\Area2.setting.txt" />
+    <None Include="Resources\Area3.setting.txt" />
+    <None Include="Resources\map4.txt" />
+    <None Include="Resources\map3.txt" />
     <Content Include="workplan.txt" />
     <None Include="Resources\UnitR033.jpg" />
     <None Include="Resources\UnitB033.jpg" />

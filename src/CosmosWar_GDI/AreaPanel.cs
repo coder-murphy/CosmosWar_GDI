@@ -59,24 +59,26 @@ namespace CosmosWar
         {
             switch (keyCode)
             {
-                case Keys.Up:
-                    if (_currentAreaIndex == 0)
-                        renderFlag = false;
-                    else
-                    {
-                        _currentAreaIndex--;
-                        renderFlag = true;
-                    }
-                    break;
-                case Keys.Down:
-                    if(_currentAreaIndex == 3)
-                        renderFlag = false;
-                    else
+                case Keys.F:
+                    if (_currentAreaIndex < 3)
                     {
                         _currentAreaIndex++;
-                        renderFlag = true;
                     }
+                    else
+                    {
+                        _currentAreaIndex = 0;
+                    }
+                    renderFlag = true;
                     break;
+                //case Keys.Down:
+                //    if(_currentAreaIndex == 3)
+                //        renderFlag = false;
+                //    else
+                //    {
+                //        _currentAreaIndex++;
+                //        renderFlag = true;
+                //    }
+                //    break;
                 case Keys.Escape:
                     Game.CurrentScene = GameScene.Entry;
                     Game.PlayBGM(GameSound.Intro);

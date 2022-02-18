@@ -107,22 +107,15 @@ namespace CosmosWar
                     if (i == u.GridLocX && j == u.GridLocY) continue;
                     Console.WriteLine($"可用格子{i},{j}");
                     IEnumerable<Unit> fUnits = Scene.Instance.FindUnits((byte)i, (byte)j);
-                    if (fUnits.Count() > 0)
+                    if (fUnits.Where(x => !x.IsHome && !x.IsFactory).Count() > 0)
                     {
                         Console.WriteLine($"{fUnits.Count()},{fUnits.First().Name}");
-                        if (fUnits.Count() == 1)
-                        {
-                            if (!fUnits.First().IsFactory && !fUnits.First().IsHome)
-                                continue;
-                        }
-                        else if(fUnits.Count() >= 2)
-                        {
-                            continue;
-                        }
+                        continue;
                     }
                     points.Add(new Point(i, j));
                 }
             }
+            Console.WriteLine($"可用格子数：{points.Count}");
             return points;
         }
 

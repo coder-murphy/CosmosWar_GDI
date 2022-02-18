@@ -4,6 +4,14 @@ SETFACTORY [Force] [MapLocX,MapLocY] // 设置工厂点位 【可以设置多个
 SETGOLD [Force] [Number] // 设置势力金钱
 SETUNIT [Force] [Id] [MapLocX,MapLocY] [Level(未实现)] // 放置单位
 DEFINEMANUFACTUREUNITTYPES [Force] [Id1,Id2,Id3....] // 设置可以生产的单位类型列表
+SETROUNDGOLDGAIN [Force] [Amount(int)] // 设置每回合结束的金钱增益
+// 设置单位初始制造出的等级 分5档
+（0:民兵 Lv：1）
+（1:新兵 Lv：3）
+（2:勤务兵 Lv：5）
+（3:正规军 Lv：7）
+（4:王牌军 Lv：9）
+SETUNITBUILDLEVEL [Force] [Level] 
 =====单位列表=====
 new Unit(0,"主机",1,1,1,0,1,32),
 new Unit(1,"制造车间",1,1,1,0,1,96),

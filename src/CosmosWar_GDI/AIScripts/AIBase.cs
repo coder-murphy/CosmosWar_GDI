@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Threading;
@@ -117,14 +118,17 @@ namespace CosmosWar.AIScripts
                 {
                     Scene.Instance.MoveSelectBoxToTarget(ownUnit.GridLocX, ownUnit.GridLocY);
                     // 获取敌方单位
-                    var enemys = Scene.Instance.Units.Where(x => x.Force != force && x.IsFactory == false);
+                    var enemys = Scene.Instance.Units.Where(x => x.Force != force);
                     Unit priorityUnit = enemys.OrderByDescending(x => enemyUnitPriorityCondition?.Invoke(x, ownUnit)).FirstOrDefault();
                     if (priorityUnit == null)
                         return;
-                    var moveGrids = CWMath.GetUnitRoundTiles(ownUnit);
-                    foreach(var i in moveGrids)
+                    var moveGrids = new List<Point>();
+                    foreach (var tempP in CWMath.GetUnitRoundTiles(ownUnit))
                     {
-                        Console.WriteLine(i);
+                        var tempU = Scene.Instance.FindUnit((byte)tempP.X, (byte)tempP.Y);
+                        if (tempU != null && tempU.Force == ownUnit.Force)
+                            continue;
+                        moveGrids.Add(tempP);
                     }
                     Thread.Sleep(1000);
                     var p = CWMath.GetNearLocInMoveGrids(moveGrids, priorityUnit.GridLocX, priorityUnit.GridLocY);

@@ -147,6 +147,12 @@ namespace CosmosWar
         {
             if (mapName == "棒旋星系L11区域")
                 return Resources.Area1_setting;
+            else if (mapName == "大麦哲伦云B7区域")
+                return Resources.Area2_setting;
+            else if (mapName == "稀疏星云G7区域")
+                return Resources.Area3_setting;
+            else if (mapName == "天琴座M8区域")
+                return Resources.Area4_setting;
             return string.Empty;
         }
 

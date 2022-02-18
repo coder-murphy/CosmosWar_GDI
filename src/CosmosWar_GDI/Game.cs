@@ -266,21 +266,9 @@ namespace CosmosWar
                             break;
                     }
                 }
-                else if (args.KeyCode == Keys.Up)
+                else if (args.KeyCode == Keys.F)
                 {
-                    if (gameOption == 1)
-                    {
-                        renderFlag = true;
-                        gameOption = 0;
-                    }
-                }
-                else if (args.KeyCode == Keys.Down)
-                {
-                    if (gameOption == 0)
-                    {
-                        renderFlag = true;
-                        gameOption = 1;
-                    }
+                    gameOption = (byte)(gameOption == 0 ? 1 : 0);
                 }
             }
             else if (CurrentScene == GameScene.AreaList)

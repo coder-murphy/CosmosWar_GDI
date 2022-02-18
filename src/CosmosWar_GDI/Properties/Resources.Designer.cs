@@ -189,26 +189,176 @@ namespace CosmosWar.Properties {
         }
         
         /// <summary>
-        ///   查找类似 BEGIN
-        ///SETSTART R 0,0
-        ///SETSTART B 27,19
-        ///SETFACTORY R 1,0
-        ///SETFACTORY B 
+        ///   查找类似 BEGIN 
+        ///SETCOMMENT(MapSize:W:27 H:19)
         ///SETGOLD R 1500
-        ///SETGOLD B 3000
-        ///PUTUNIT R 2 0,0 3
-        ///PUTUNIT B 2 0,0 3
-        ///END
-        ///syntax:
-        ///SETSTART [Force] [MapLocX,MapLocY] // 设置初始点位【只能设置一次】
-        ///SETFACTORY [Force] [MapLocX,MapLocY] // 设置工厂点位 【可以设置多个工厂】
-        ///SETGOLD [Force] [Number] // 设置势力金钱
-        ///PUTUNIT [Force] [Id] [MapLocX,MapLocY] [Level] // 放置单位
-        /// 的本地化字符串。
+        ///SETGOLD B 1500
+        ///SETSTART B 0,0
+        ///SETSTART R 27,19
+        ///SETFACTORY B 1,0
+        ///SETFACTORY R 26,19
+        ///SETUNIT B 2 3,0 3
+        ///SETUNIT B 4 0,3 3
+        ///SETUNIT B 27 0,0 16
+        ///SETUNIT B 32 1,0 18
+        ///SETUNIT B 18 1,1 14
+        ///SETUNIT R 2 26,19 3
+        ///SETUNIT R 5 25,15 3
+        ///SETUNIT R 21 27,18 16
+        ///SETUNIT R 31 26,18 18
+        ///SETUNIT R 29 27,19 15
+        ///DEFINEMANUFACTUREUNITTYPES R 2,5,6,7,14,16,19,20,21,31,33
+        ///DEFINEMANUFACTUREUNITTYPES B 3,4,8,12,15,17,18,25,26,27,32
+        ///SETROUNDGOLDGAIN R 150
+        ///SETROUNDGOLDGA [字符串的其余部分被截断]&quot;; 的本地化字符串。
         /// </summary>
         internal static string Area1_setting {
             get {
                 return ResourceManager.GetString("Area1.setting", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 [棒旋星系L11区域]
+        ///6,4,5,4,1,1,6,4,4,4,2,1,2,0,0,1,0,0,0,2,2,1,1,0,0,0,0,0
+        ///4,6,4,1,1,0,1,7,5,4,0,0,0,3,0,0,0,0,0,0,0,1,1,1,1,0,0,0
+        ///4,4,1,2,0,2,0,1,3,3,0,0,2,0,0,0,5,4,0,0,1,1,2,2,2,0,0,0
+        ///4,1,3,1,3,4,1,1,2,1,2,2,1,1,0,0,5,6,0,0,1,1,2,3,1,0,1,0
+        ///1,1,0,0,4,5,2,3,4,4,4,3,1,1,1,0,3,4,0,0,0,1,0,3,1,0,0,0
+        ///0,0,0,1,1,4,4,4,0,5,2,1,3,1,0,0,0,1,0,0,0,1,1,3,1,0,0,3
+        ///0,1,0,1,1,0,1,1,0,0,0,0,1,2,0,0,0,1,1,0,0,0,0,1,0,0,2,0
+        ///0,0,0,0,0,0,0,0,0,1,3,4,1,0,0,0,1,1,0,0,0,1,0,0,0,0,3,2
+        ///0,0,1,0,1,0,0,0,1,1,1,4,1,0,0,0,0,0,1,0,0,1 [字符串的其余部分被截断]&quot;; 的本地化字符串。
+        /// </summary>
+        internal static string Area2 {
+            get {
+                return ResourceManager.GetString("Area2", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 BEGIN 
+        ///SETCOMMENT(MapSize:W:27 H:19)
+        ///SETGOLD R 1500
+        ///SETGOLD B 1500
+        ///SETSTART B 0,0
+        ///SETSTART R 27,19
+        ///SETFACTORY B 1,0
+        ///SETFACTORY R 26,19
+        ///SETUNIT B 2 3,0 3
+        ///SETUNIT B 4 0,3 3
+        ///SETUNIT B 27 0,0 16
+        ///SETUNIT B 32 1,0 18
+        ///SETUNIT B 18 1,1 14
+        ///SETUNIT R 2 26,19 3
+        ///SETUNIT R 5 25,15 3
+        ///SETUNIT R 21 27,18 16
+        ///SETUNIT R 31 26,18 18
+        ///SETUNIT R 29 27,19 15
+        ///DEFINEMANUFACTUREUNITTYPES R 2,5,6,7,14,16,19,20,21,31,33
+        ///DEFINEMANUFACTUREUNITTYPES B 3,4,8,12,15,17,18,25,26,27,32
+        ///SETROUNDGOLDGAIN R 150
+        ///SETROUNDGOLDGA [字符串的其余部分被截断]&quot;; 的本地化字符串。
+        /// </summary>
+        internal static string Area2_setting {
+            get {
+                return ResourceManager.GetString("Area2_setting", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 [棒旋星系L11区域]
+        ///6,4,5,4,1,1,6,4,4,4,2,1,2,0,0,1,0,0,0,2,2,1,1,0,0,0,0,0
+        ///4,6,4,1,1,0,1,7,5,4,0,0,0,3,0,0,0,0,0,0,0,1,1,1,1,0,0,0
+        ///4,4,1,2,0,2,0,1,3,3,0,0,2,0,0,0,5,4,0,0,1,1,2,2,2,0,0,0
+        ///4,1,3,1,3,4,1,1,2,1,2,2,1,1,0,0,5,6,0,0,1,1,2,3,1,0,1,0
+        ///1,1,0,0,4,5,2,3,4,4,4,3,1,1,1,0,3,4,0,0,0,1,0,3,1,0,0,0
+        ///0,0,0,1,1,4,4,4,0,5,2,1,3,1,0,0,0,1,0,0,0,1,1,3,1,0,0,3
+        ///0,1,0,1,1,0,1,1,0,0,0,0,1,2,0,0,0,1,1,0,0,0,0,1,0,0,2,0
+        ///0,0,0,0,0,0,0,0,0,1,3,4,1,0,0,0,1,1,0,0,0,1,0,0,0,0,3,2
+        ///0,0,1,0,1,0,0,0,1,1,1,4,1,0,0,0,0,0,1,0,0,1 [字符串的其余部分被截断]&quot;; 的本地化字符串。
+        /// </summary>
+        internal static string Area3 {
+            get {
+                return ResourceManager.GetString("Area3", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 BEGIN 
+        ///SETCOMMENT(MapSize:W:27 H:19)
+        ///SETGOLD R 1500
+        ///SETGOLD B 1500
+        ///SETSTART B 0,0
+        ///SETSTART R 27,19
+        ///SETFACTORY B 1,0
+        ///SETFACTORY R 26,19
+        ///SETUNIT B 2 3,0 3
+        ///SETUNIT B 4 0,3 3
+        ///SETUNIT B 27 0,0 16
+        ///SETUNIT B 32 1,0 18
+        ///SETUNIT B 18 1,1 14
+        ///SETUNIT R 2 26,19 3
+        ///SETUNIT R 5 25,15 3
+        ///SETUNIT R 21 27,18 16
+        ///SETUNIT R 31 26,18 18
+        ///SETUNIT R 29 27,19 15
+        ///DEFINEMANUFACTUREUNITTYPES R 2,5,6,7,14,16,19,20,21,31,33
+        ///DEFINEMANUFACTUREUNITTYPES B 3,4,8,12,15,17,18,25,26,27,32
+        ///SETROUNDGOLDGAIN R 150
+        ///SETROUNDGOLDGA [字符串的其余部分被截断]&quot;; 的本地化字符串。
+        /// </summary>
+        internal static string Area3_setting {
+            get {
+                return ResourceManager.GetString("Area3_setting", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 [棒旋星系L11区域]
+        ///6,4,5,4,1,1,6,4,4,4,2,1,2,0,0,1,0,0,0,2,2,1,1,0,0,0,0,0
+        ///4,6,4,1,1,0,1,7,5,4,0,0,0,3,0,0,0,0,0,0,0,1,1,1,1,0,0,0
+        ///4,4,1,2,0,2,0,1,3,3,0,0,2,0,0,0,5,4,0,0,1,1,2,2,2,0,0,0
+        ///4,1,3,1,3,4,1,1,2,1,2,2,1,1,0,0,5,6,0,0,1,1,2,3,1,0,1,0
+        ///1,1,0,0,4,5,2,3,4,4,4,3,1,1,1,0,3,4,0,0,0,1,0,3,1,0,0,0
+        ///0,0,0,1,1,4,4,4,0,5,2,1,3,1,0,0,0,1,0,0,0,1,1,3,1,0,0,3
+        ///0,1,0,1,1,0,1,1,0,0,0,0,1,2,0,0,0,1,1,0,0,0,0,1,0,0,2,0
+        ///0,0,0,0,0,0,0,0,0,1,3,4,1,0,0,0,1,1,0,0,0,1,0,0,0,0,3,2
+        ///0,0,1,0,1,0,0,0,1,1,1,4,1,0,0,0,0,0,1,0,0,1 [字符串的其余部分被截断]&quot;; 的本地化字符串。
+        /// </summary>
+        internal static string Area4 {
+            get {
+                return ResourceManager.GetString("Area4", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 BEGIN 
+        ///SETCOMMENT(MapSize:W:27 H:19)
+        ///SETGOLD R 1500
+        ///SETGOLD B 1500
+        ///SETSTART B 0,0
+        ///SETSTART R 27,19
+        ///SETFACTORY B 1,0
+        ///SETFACTORY R 26,19
+        ///SETUNIT B 2 3,0 3
+        ///SETUNIT B 4 0,3 3
+        ///SETUNIT B 27 0,0 16
+        ///SETUNIT B 32 1,0 18
+        ///SETUNIT B 18 1,1 14
+        ///SETUNIT R 2 26,19 3
+        ///SETUNIT R 5 25,15 3
+        ///SETUNIT R 21 27,18 16
+        ///SETUNIT R 31 26,18 18
+        ///SETUNIT R 29 27,19 15
+        ///DEFINEMANUFACTUREUNITTYPES R 2,5,6,7,14,16,19,20,21,31,33
+        ///DEFINEMANUFACTUREUNITTYPES B 3,4,8,12,15,17,18,25,26,27,32
+        ///SETROUNDGOLDGAIN R 150
+        ///SETROUNDGOLDGA [字符串的其余部分被截断]&quot;; 的本地化字符串。
+        /// </summary>
+        internal static string Area4_setting {
+            get {
+                return ResourceManager.GetString("Area4_setting", resourceCulture);
             }
         }
         

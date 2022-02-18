@@ -159,6 +159,13 @@ namespace CosmosWar
                     isVictory = false;
                 }
             }
+            else if(keyCode == Keys.F)
+            {
+                if (isGameMenuShowing)
+                    gameMenuOption = gameMenuOption == 1 ? 0 : 1;
+                renderFlag = true;
+                return;
+            }
             #region directions
             else if (keyCode == Keys.Left || keyCode == Keys.A)
             {
@@ -286,8 +293,7 @@ namespace CosmosWar
                 }
                 else
                 {
-                    if (gameMenuOption == 1) gameMenuOption = 0;
-                    else gameMenuOption = 1;
+
                 }
             }
             else if (keyCode == Keys.Right || keyCode == Keys.D)
@@ -412,8 +418,7 @@ namespace CosmosWar
                 }
                 else
                 {
-                    if (gameMenuOption == 1) gameMenuOption = 0;
-                    else gameMenuOption = 1;
+
                 }
                 isDirKey = true;
             }
@@ -1120,6 +1125,24 @@ namespace CosmosWar
                     }
                     Logger.Log($"加载地图可生产单位类型 {force} {types}");
                 }
+                else if (words[0] == "SETROUNDGOLDGAIN")
+                {
+                    string force = words[1];
+                    if (force == "R")
+                        roundGoldGainR = int.Parse(words[2]);
+                    else
+                        roundGoldGainB = int.Parse(words[2]);
+                    Logger.Log($"加载每回合结束金钱收益 {force} Gold:{words[2]}");
+                }
+                else if(words[0] == "SETUNITBUILDLEVEL")
+                {
+                    string force = words[1];
+                    if (force == "R")
+                        buildUnitLevelR = int.Parse(words[2]) * 2 + 1;
+                    else
+                        buildUnitLevelB = int.Parse(words[2]) * 2 + 1;
+                    Logger.Log($"加载初始单位等级 {force} 单位品阶:{words[2]}");
+                }
             }
             isHumanRound = true;
         }
@@ -1174,7 +1197,7 @@ namespace CosmosWar
                         if(tUnits.Count() > 0) // 如果移动到的地方有敌方单位
                         {
                             IEnumerable<Unit> sUnits = tUnits.Where(x => !x.IsFactory && !x.IsHome);
-                            if(tUnits.Count() - sUnits.Count() == 1)// 说明有单位叠在建筑上
+                            if(tUnits.Count() - sUnits.Count() >= 1)// 说明有单位叠在建筑上
                             {
                                 Unit home = tUnits.FirstOrDefault(x => x.IsHome);
                                 if(sUnits.Count() > 0)
@@ -1191,7 +1214,11 @@ namespace CosmosWar
                             }
                             else
                             {
-                                AttackUnitNormal(currentSelectedUnit.unit, tUnits.First());
+                                Unit fUnit = tUnits.First();
+                                if(!fUnit.IsBackGround)
+                                    AttackUnitNormal(currentSelectedUnit.unit, tUnits.First());
+                                else if(fUnit.IsHome)
+                                    Victory(u.Force);
                             }
                             dur = 3;
                         }
@@ -1225,8 +1252,11 @@ namespace CosmosWar
             int actuallX = (int)(gapX + (gridX - currentScreenGridLeft) * ScreenTileSize);
             int actuallY = (int)(gapY + (gridY - currentScreenGridTop) * ScreenTileSize + 20f);
             Game.DisplayDamage(dmg, actuallX - 1, actuallY, 2);
-            if(dst.Life < 0)
+            if (dst.Life < 0)
+            {
+                src.Level = src.Level < 25 ? src.Level += 1 : 25;
                 DestroyUnit(dst);
+            }
             else
             {
                 var rounds = CWMath.GetUnitRoundTilesByGridNum(dst, 1);
@@ -1236,6 +1266,8 @@ namespace CosmosWar
                     var p = rounds.First();
                     src.GridLocX = (byte)p.X;
                     src.GridLocY = (byte)p.Y;
+                    if (FindUnits(src.GridLocX, src.GridLocY).Where(x => x.IsHome && x.Force != src.Force).Count() > 0)
+                        Victory(src.Force);
                 }
                 else
                 {
@@ -1265,8 +1297,8 @@ namespace CosmosWar
                 if (movedUnitCount == count)
                 {
                     SetUnitPropertiesShown(null, false);
-                    GoldB += 300;
-                    GoldR += 300;
+                    GoldB += roundGoldGainB;
+                    GoldR += roundGoldGainR;
                     if (isHumanRound)
                     {
                         var g = GoldR;
@@ -1282,6 +1314,8 @@ namespace CosmosWar
                     }
                     foreach (var unit in unitList)
                     {
+                        if(unit.IsFactory && FindUnits(unit.GridLocX,unit.GridLocY).Where(x => x.Force != unit.Force).Count() > 0)
+                            continue;
                         unit.IsThisRoundMoved = false;
                     }
                     isHumanRound = isHumanRound != true;
@@ -1355,6 +1389,7 @@ namespace CosmosWar
                 dU.IsThisRoundMoved = true; //测试期间移除
                 Unit nU = Unit.Clone(mU);
                 nU.Force = isHumanRound ? "B" : "R";
+                nU.Level = isHumanRound ? buildUnitLevelR : buildUnitLevelR;
                 Console.WriteLine(nU.Force);
                 //nU.GridLocX = currentSelectedUnit.unit.GridLocX;
                 //nU.GridLocY = currentSelectedUnit.unit.GridLocY;
@@ -1454,6 +1489,10 @@ namespace CosmosWar
         private static string humanGameOverTitle = string.Empty;
         // 2022.2.16
         private AIBase currentAI;
+        private int roundGoldGainB = 50;
+        private int roundGoldGainR = 50;
+        private int buildUnitLevelR = 0;
+        private int buildUnitLevelB = 0;
 
         #region AI
         private void RunAIScript()
