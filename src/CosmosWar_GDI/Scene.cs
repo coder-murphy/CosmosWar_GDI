@@ -191,6 +191,16 @@ namespace CosmosWar
                     }
                     else if (isUnitSelected && currentSelectedUnit.unit.Force == OurForce && !isUnitMoving && !currentSelectedUnit.unit.IsThisRoundMoved)
                     {
+                        if (isUnitCasting)
+                        {
+                            if (exSkillTargets.Count == 0)
+                            {
+                                renderFlag = false;
+                                return;
+                            }
+                            currentExSkillCastTargetIndex = currentExSkillCastTargetIndex > 0 ? --currentExSkillCastTargetIndex : 0;
+                            ChangeEXSkillCastTarget(currentExSkillCastTargetIndex);
+                        }
                         Logger.Log("按下Left");
                         if(!currentSelectedUnit.unit.IsThisRoundMoved)
                             currentUnitAction = currentUnitAction > 0 ? --currentUnitAction : (byte)0;
@@ -244,7 +254,7 @@ namespace CosmosWar
                 if (!isGameMenuShowing)
                 {
                     isDirKey = true;
-                    if (isHumanRound == false)
+                    if (isHumanRound == false || isUnitCasting)
                     {
                         renderFlag = true;
                         return;
@@ -320,6 +330,16 @@ namespace CosmosWar
                     }
                     else if (isUnitSelected && currentSelectedUnit.unit.Force == OurForce && !isUnitMoving && !currentSelectedUnit.unit.IsThisRoundMoved)
                     {
+                        if(isUnitCasting)
+                        {
+                            if (exSkillTargets.Count == 0)
+                            {
+                                renderFlag = false;
+                                return;
+                            }
+                            currentExSkillCastTargetIndex = currentExSkillCastTargetIndex < exSkillTargets.Count - 1 ? ++currentExSkillCastTargetIndex : exSkillTargets.Count - 1;
+                            ChangeEXSkillCastTarget(currentExSkillCastTargetIndex);
+                        }
                         Logger.Log("按下Right");
                         if (!currentSelectedUnit.unit.IsThisRoundMoved)
                             currentUnitAction = (byte)(currentUnitAction < unitOrdersBuffers.Length - 1 ? ++currentUnitAction : unitOrdersBuffers.Length - 1);
@@ -370,7 +390,7 @@ namespace CosmosWar
                 }
                 if (!isGameMenuShowing)
                 {
-                    if (isHumanRound == false)
+                    if (isHumanRound == false || isUnitCasting)
                     {
                         renderFlag = true;
                         return;
@@ -447,6 +467,10 @@ namespace CosmosWar
                     {
                         MoveUnit(currentSelectedUnit.unit, absCurrentTargetTileX, absCurrentTargetTileY);
                     }
+                    else if(isUnitCasting)
+                    {
+                        CastEXSkill(currentSelectedUnit.unit, exSkillCastTarget);
+                    }
                     else if(!isUnitSelected)
                     {
                         SelectTile(absCurrentTargetTileX, absCurrentTargetTileY);// 进行块选择
@@ -477,12 +501,17 @@ namespace CosmosWar
                 {
                 }
             }
-            else if ((keyCode == Keys.NumPad1 || keyCode == Keys.J) && !isVictory) //取消生产
+            else if ((keyCode == Keys.NumPad1 || keyCode == Keys.J) && !isVictory) //取消生产/指令
             {
                 if (isHumanRound == false)
                 {
                     renderFlag = true;
                     return;
+                }
+                if (isUnitCasting)
+                {
+                    isUnitCommandPanelShowing = true;
+                    isUnitCasting = false;
                 }
                 if (isFactoryRunning)
                 {
@@ -619,6 +648,33 @@ namespace CosmosWar
             currentScreenTargetTileY = (byte)(locY - currentScreenGridTop);
         }
 
+        /// <summary>
+        /// 设置场景图形操作
+        /// </summary>
+        /// <param name="action"></param>
+        public void SetSceneGraphicsAction(Action<Graphics> action,bool displayFlag = true)
+        {
+            graphicsAction = action;
+            displayGraphicsActionFlag = displayFlag;
+        }
+
+        Action<Graphics> graphicsAction = null;
+        bool displayGraphicsActionFlag = true;
+
+        /// <summary>
+        /// 获取网格坐标对应的屏幕坐标
+        /// </summary>
+        /// <param name="gridX"></param>
+        /// <param name="gridY"></param>
+        /// <param name="screenX"></param>
+        /// <param name="screenY"></param>
+        public PointF GetUnitScreenLoc(int gridX,int gridY)
+        {
+            float screenX = gapX + (gridX - currentScreenGridLeft) * ScreenTileSize + ScreenTileSize / 2;
+            float screenY = gapY + (gridY - currentScreenGridTop) * ScreenTileSize + ScreenTileSize / 2;
+            return new PointF(screenX, screenY);
+        }
+
         internal void Run()
         {
             if(isSceneRunning == false)
@@ -668,7 +724,7 @@ namespace CosmosWar
                 Image icon = currentSelectedUnit.Icon;
                 float infoX = rectUnitIcon.Right + 10f;
                 g.DrawImage(icon, rectUnitIcon);
-                g.DrawString($"Name:{infos[0]}", Define.FontSystem14, Define.WhiteBrush, infoX, ConsolePropTop + 5f);
+                g.DrawString($"Name:{infos[0]}", Define.FontSystem12, Define.WhiteBrush, infoX, ConsolePropTop + 5f);
                 if(currentSelectedUnit.unit.IsFactory)
                 {
                     if(currentSelectedUnit.unit.IsThisRoundMoved)
@@ -682,12 +738,14 @@ namespace CosmosWar
                 }
                 if(currentSelectedUnit.IsActiveUnit)
                 {
-                    g.DrawString($"HP:{infos[1]}", Define.FontSystem14, Define.WhiteBrush, infoX, ConsolePropTop + 30f);
-                    g.DrawString($"Attack:{infos[2]}", Define.FontSystem14, Define.WhiteBrush, infoX + 200f, ConsolePropTop + 30f);
-                    g.DrawString($"Armor:{infos[3]}", Define.FontSystem14, Define.WhiteBrush, infoX, ConsolePropTop + 55f);
-                    g.DrawString($"Move:{infos[4]}", Define.FontSystem14, Define.WhiteBrush, infoX + 200f, ConsolePropTop + 55f);
+                    g.DrawString($"HP:{infos[1]}", Define.FontSystem12, Define.WhiteBrush, infoX, ConsolePropTop + 30f);
+                    g.DrawString($"Attack:{infos[2]}", Define.FontSystem12, Define.WhiteBrush, infoX + 100f, ConsolePropTop + 30f);
+                    g.DrawString($"Armor:{infos[3]}", Define.FontSystem12, Define.WhiteBrush, infoX, ConsolePropTop + 55f);
+                    g.DrawString($"Move:{infos[4]}", Define.FontSystem12, Define.WhiteBrush, infoX + 100f, ConsolePropTop + 55f);
                     // EX
-                    g.DrawString($"{currentSelectedUnit.EXSkillInfo}", Define.FontSystem, Define.YellowBrush, infoX + 200f, ConsolePropTop + 5f);
+                    if (!currentSelectedUnit.EXSkillInfo.Equals(EXSkill.None))
+                        g.DrawRectangle(Define.FramePenWhite2, infoX + 230f, ConsolePropTop + 5f, 190f, 80f);
+                    g.DrawString($"{currentSelectedUnit.EXSkillInfo}", Define.FontSystem, Define.YellowBrush, infoX + 240f, ConsolePropTop + 15f);
                 }
             }
             if(Game.WarningMessageShown)
@@ -798,7 +856,6 @@ namespace CosmosWar
             int maxT = currentScreenGridTop + ScreenGridMaxHeight;
             int minL = currentScreenGridLeft;
             int minT = currentScreenGridTop;
-            
             for (int i = minL; i < maxL; i++)
             {
                 for (int j = minT; j < maxT; j++)
@@ -860,6 +917,37 @@ namespace CosmosWar
                 }
             }
 
+            if (isUnitCasting)
+            {
+                if (exSkillCastTarget == null) return;
+                Unit u = exSkillCastTarget;
+                byte tX = (byte)(u.GridLocX - currentScreenGridLeft);
+                byte tY = (byte)(u.GridLocY - currentScreenGridTop);
+                // up
+                g.DrawLine(Define.FramePenRed5,
+                    gapX + tX * ScreenTileSize,
+                    gapY + tY * ScreenTileSize,
+                    gapX + (tX + 1) * ScreenTileSize,
+                    gapY + tY * ScreenTileSize);
+                // down
+                g.DrawLine(Define.FramePenRed5,
+                    gapX + tX * ScreenTileSize,
+                    gapY + (tY + 1) * ScreenTileSize,
+                    gapX + (tX + 1) * ScreenTileSize,
+                    gapY + (tY + 1) * ScreenTileSize);
+                // left
+                g.DrawLine(Define.FramePenRed5,
+                    gapX + tX * ScreenTileSize,
+                    gapY + tY * ScreenTileSize,
+                    gapX + tX * ScreenTileSize,
+                    gapY + (tY + 1) * ScreenTileSize);
+                // right
+                g.DrawLine(Define.FramePenRed5,
+                    gapX + (tX + 1) * ScreenTileSize,
+                    gapY + tY * ScreenTileSize,
+                    gapX + (tX + 1) * ScreenTileSize,
+                    gapY + (tY + 1) * ScreenTileSize);
+            }
             // 绘制选择框
             byte cstX = currentScreenTargetTileX;
             byte cstY = currentScreenTargetTileY;
@@ -887,6 +975,9 @@ namespace CosmosWar
                 gapY + cstY * ScreenTileSize,
                 gapX + (cstX + 1) * ScreenTileSize,
                 gapY + (cstY + 1) * ScreenTileSize);
+            // efforts
+            if (displayGraphicsActionFlag)
+                graphicsAction?.Invoke(g);
             if (Game.IsDamageDisplay)
             {
                 //Console.WriteLine($"显示伤害:{Game.CurrentDamage}");
@@ -997,10 +1088,37 @@ namespace CosmosWar
         /// 生成目标群以选择单位释放Ex技
         /// </summary>
         /// <param name="u"></param>
-        private void CastEXSkill(Unit u)
+        private void GenEXSkillTargets(Unit u)
         {
+            IEnumerable<Unit> targets = CWMath.GetEnemysByEXSkillCastRange(u);
+            if(targets.Count() == 0)
+            {
+                Game.SetWarningMessage("附近无EX技能可以\r\n攻击到的目标。", 2);
+                isUnitCommandPanelShowing = true;
+                isUnitCasting = false;
+                return;
+            }
+            Console.WriteLine($"获取到EX技攻击目标数：{targets.Count()}");
+            exSkillTargets.AddRange(targets);
+            currentExSkillCastTargetIndex = 0;
+            ChangeEXSkillCastTarget(currentExSkillCastTargetIndex);
             isUnitCasting = true;
         }
+
+        /// <summary>
+        /// 改变EX技能攻击目标
+        /// </summary>
+        /// <param name="targetIndex"></param>
+        private void ChangeEXSkillCastTarget(int targetIndex)
+        {
+            if (exSkillTargets.Count == 0 || targetIndex < 0 || targetIndex >= exSkillTargets.Count)
+                return;
+            exSkillCastTarget = exSkillTargets[targetIndex];
+            FocusTo(exSkillCastTarget.GridLocX,exSkillCastTarget.GridLocY);
+            Console.WriteLine($"切换EX技能攻击目标：{exSkillCastTarget.Name}");
+        }
+
+        private Unit exSkillCastTarget = null;
 
         /// <summary>
         /// 释放ex技能
@@ -1009,7 +1127,8 @@ namespace CosmosWar
         /// <param name="dst"></param>
         private void CastEXSkill(Unit src,Unit dst)
         {
-
+            Task.Run(() => Anime.Instance.CastEXSkill(src, dst));
+            castStep = 0;
         }
 
         private void OrderUnit(int option)
@@ -1023,7 +1142,7 @@ namespace CosmosWar
                     break;
                 case 1:
                     if(isActiveUnit && !currentSelectedUnit.unit.EXSkill.Equals(EXSkill.None))
-                        CastEXSkill(currentSelectedUnit.unit);
+                        GenEXSkillTargets(currentSelectedUnit.unit);
                     break;
                 case 2:
                     SetUnitPropertiesShown(currentSelectedUnit.unit, false);
@@ -1063,6 +1182,7 @@ namespace CosmosWar
             isHumanRound = true;
             isVictory = false;
             victoryForce = string.Empty;
+            exSkillTargets.Clear();
         }
 
         private void LoadMapSetting(string settingText)
@@ -1179,16 +1299,19 @@ namespace CosmosWar
         private void Init()
         {
             ShowMoveGrids = true;
-            Anime.AnimeFinished += (u, type) =>
+            Anime.AnimeFinished += args =>
             {
                 isUnitSelected = false;
                 currentSelectedUnit.shown = false;
                 isUnitMoving = false;
                 isUnitCasting = false;
                 isUnitCommandPanelShowing = false;
-                switch (type)
+                Unit u = args.SrcUnit;
+                Unit dU = args.DstUnit;
+                switch (args.AnimeType)
                 {
-                    case AnimeType.Move:
+                    #region Move
+                    case AnimeTypes.Move:
                         isUnitMoving = false;
                         ShowMoveGrids = true;
                         currentSelectedUnit.unit.IsThisRoundMoved = true ; //测试的话就无限移动
@@ -1234,6 +1357,20 @@ namespace CosmosWar
                         }
                         CheckRoundEnd(dur);
                         break;
+                    #endregion
+                    case AnimeTypes.Cast:
+                        currentSelectedUnit.unit.IsThisRoundMoved = true; //测试的话就无限移动
+                        CastDamage(u, dU);
+                        isUnitCasting = false;
+                        exSkillTargets.Clear();
+                        Unit factory1 = sceneUnits.FirstOrDefault(x => x.IsFactory && u.Force == x.Force && x.GridLocX == u.GridLocX && x.GridLocY == u.GridLocY);
+                        if (factory1 != null)
+                        {
+                            //如果工厂被压住了则工厂本回合不再生产
+                            factory1.IsThisRoundMoved = true;
+                        }
+                        CheckRoundEnd(1);
+                        break;
                 }
             };
         }
@@ -1276,6 +1413,28 @@ namespace CosmosWar
                 }
             }
             Console.WriteLine($"{src.Name}[LV:{src.Level}] 对 {dst.Name}[LV:{dst.Level}] 造成伤害{dmg}");
+        }
+
+        /// <summary>
+        /// 释放技能伤害
+        /// </summary>
+        /// <param name="src"></param>
+        /// <param name="dst"></param>
+        public void CastDamage(Unit src,Unit dst)
+        {
+            int dmg = CWMath.GetDamage(src.EXSkill.EXSkillDmgExtra + src.Damage, dst.Armor, 0.6f, src.Level, dst.Level);
+            dst.Life -= dmg;
+            byte gridX = dst.GridLocX;
+            byte gridY = dst.GridLocY;
+            int actuallX = (int)(gapX + (gridX - currentScreenGridLeft) * ScreenTileSize);
+            int actuallY = (int)(gapY + (gridY - currentScreenGridTop) * ScreenTileSize + 20f);
+            Game.DisplayDamage(dmg, actuallX - 1, actuallY, 2);
+            if (dst.Life < 0)
+            {
+                src.Level = src.Level < 25 ? src.Level += 1 : 25;
+                DestroyUnit(dst);
+            }
+            Console.WriteLine($"{src.Name}[LV:{src.Level}] 对 {dst.Name}[LV:{dst.Level}] 施放技能：{src.EXSkill.EXSkillName} 造成伤害{dmg}");
         }
 
 
@@ -1390,6 +1549,8 @@ namespace CosmosWar
                 Unit nU = Unit.Clone(mU);
                 nU.Force = isHumanRound ? "B" : "R";
                 nU.Level = isHumanRound ? buildUnitLevelR : buildUnitLevelR;
+                if (Define.DefineUnitEXSkills.ContainsKey(nU.Id))
+                    nU.EXSkill = Define.DefineUnitEXSkills[nU.Id];
                 Console.WriteLine(nU.Force);
                 //nU.GridLocX = currentSelectedUnit.unit.GridLocX;
                 //nU.GridLocY = currentSelectedUnit.unit.GridLocY;
@@ -1493,6 +1654,10 @@ namespace CosmosWar
         private int roundGoldGainR = 50;
         private int buildUnitLevelR = 0;
         private int buildUnitLevelB = 0;
+        // 2022.2.19
+        private List<Unit> exSkillTargets = new List<Unit>();
+        private int currentExSkillCastTargetIndex;
+        private int castStep = 0;
 
         #region AI
         private void RunAIScript()
@@ -1524,15 +1689,5 @@ namespace CosmosWar
             /// </summary>
             public bool IsActiveUnit { get; internal set; }
         }
-    }
-
-    /// <summary>
-    /// 移动过程标志位
-    /// </summary>
-    public enum MoveActionProcess
-    {
-        NotMove = -1,
-        Moving = 0,
-        MoveEnd = 1,
     }
 }

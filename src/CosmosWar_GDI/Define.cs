@@ -32,6 +32,8 @@ namespace CosmosWar
         public static Pen FramePenWhite2 => framePenWhite2;
         public static Font FontSystem14 => fontSystem14;
 
+        public static Pen FramePenRed5 => framePenRed5;
+
         public static Font FontUnitLevel => fontUnitLevel;
         public static Font FontSystem12 => fontSystem12;
         public static Font FontSystem16Bold => fontSystem16Bold;
@@ -219,9 +221,93 @@ namespace CosmosWar
     /// 跟据声明EX技能
     /// </summary>
     public static readonly Dictionary<int,EXSkill> DefineUnitEXSkills = new Dictionary<int, EXSkill>
-        {
-            {17,new EXSkill{EXSkillName = "初级HML广域攻击",EXSkillDmgExtra = 10,AttackType = AttackType.Laser} }
-        };
+    {
+        {17,new EXSkill(x => {
+            x.EXSkillName = "光束攻击";
+            x.EXSkillDmgExtra = 10;
+            x.AttackType = AttackTypes.Laser;
+        })},
+        {18,new EXSkill(x => {
+            x.EXSkillName = "榴弹炮攻击";
+            x.EXSkillDmgExtra = 8;
+            x.AttackType = AttackTypes.Rockets;
+        })},
+        {19,new EXSkill(x => {
+            x.EXSkillName = "光束攻击";
+            x.EXSkillDmgExtra = 11;
+            x.AttackType = AttackTypes.Laser;
+        })}, 
+        {20,new EXSkill(x => {
+            x.EXSkillName = "光束攻击";
+            x.EXSkillDmgExtra = 11;
+            x.AttackType = AttackTypes.Laser;
+        })},
+        {21,new EXSkill(x => {
+            x.EXSkillName = "先驱飞弹攻击";
+            x.EXSkillDmgExtra = 11;
+            x.AttackType = AttackTypes.PionnerMissiles;
+        })},
+        {22,new EXSkill(x => {
+            x.EXSkillName = "高能脉冲攻击";
+            x.EXSkillDmgExtra = 15;
+            x.AttackType = AttackTypes.HugePulse;
+        })},
+        {23,new EXSkill(x => {
+            x.EXSkillName = "双联装飞弹攻击";
+            x.EXSkillDmgExtra = 12;
+            x.AttackType = AttackTypes.Rockets;
+        })},
+        {24,new EXSkill(x => {
+            x.EXSkillName = "聚能光束攻击";
+            x.EXSkillDmgExtra = 15;
+            x.AttackType = AttackTypes.ElectronBeam;
+        })},
+        {25,new EXSkill(x => {
+            x.EXSkillName = "常规激光攻击";
+            x.EXSkillDmgExtra = 12;
+            x.AttackType = AttackTypes.ElectronBeam;
+        })},
+        {26,new EXSkill(x => {
+            x.EXSkillName = "常规激光攻击";
+            x.EXSkillDmgExtra = 12;
+            x.AttackType = AttackTypes.ElectronBeam;
+        })},
+        {27,new EXSkill(x => {
+            x.EXSkillName = "常规激光攻击";
+            x.EXSkillDmgExtra = 12;
+            x.AttackType = AttackTypes.ElectronBeam;
+        })},
+        {28,new EXSkill(x => {
+            x.EXSkillName = "常规激光攻击";
+            x.EXSkillDmgExtra = 12;
+            x.AttackType = AttackTypes.ElectronBeam;
+        })},
+        {29,new EXSkill(x => {
+            x.EXSkillName = "脉冲攻击";
+            x.EXSkillDmgExtra = 16;
+            x.AttackType = AttackTypes.HugePulse;
+        })},
+        {30,new EXSkill(x => {
+            x.EXSkillName = "岩浆炮攻击";
+            x.EXSkillDmgExtra = 20;
+            x.AttackType = AttackTypes.Fire;
+        })},
+        {31,new EXSkill(x => {
+            x.EXSkillName = "引力波攻击";
+            x.EXSkillDmgExtra = 16;
+            x.AttackType = AttackTypes.GravityBurst;
+        })},
+        {32,new EXSkill(x => {
+            x.EXSkillName = "棱镜光束攻击";
+            x.EXSkillDmgExtra = 22;
+            x.AttackType = AttackTypes.ElectronBeam;
+        })},
+        {33,new EXSkill(x => {
+            x.EXSkillName = "死光攻击";
+            x.EXSkillDmgExtra = 26;
+            x.AttackType = AttackTypes.DeadLight;
+        })},
+    };
 
         private static Brush brushWhite = new SolidBrush(Color.White);
         private static Brush brushYellow = new SolidBrush(Color.Yellow); 
@@ -233,6 +319,7 @@ namespace CosmosWar
         private static Font fontSystem16Bold = new Font("微软雅黑", 16f, FontStyle.Bold);
         private static Font fontTitle = new Font("微软雅黑", titleFontSize);
         private static Font fontAreaList = new Font("宋体", 12f, FontStyle.Bold);
+        private static Pen framePenRed5 = new Pen(Color.Red, 5f);
         private static Pen framePenWhite5 = new Pen(Color.White, 5f);
         private static Pen framePenWhite10 = new Pen(Color.White, 10f);
         private static Pen framePenWhite2 = new Pen(Color.White, 2f);
@@ -248,7 +335,7 @@ namespace CosmosWar
     /// <summary>
     /// 攻击方式
     /// </summary>
-    public enum AttackType
+    public enum AttackTypes
     {
         /// <summary>
         /// 常规攻击

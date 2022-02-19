@@ -11,6 +11,8 @@ namespace CosmosWar
         public static void Log(object obj)
         {
             //Console.WriteLine(obj?.ToString());
+            if (!DebugWindowVisible)
+                return;
             loggerActObj = obj;
             Game.GameWindow?.Invoke(loggerAct);
         }

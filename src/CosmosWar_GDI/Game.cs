@@ -8,10 +8,10 @@ using System.Windows.Forms;
 using System.Media;
 using System.IO;
 using System.Runtime.InteropServices;
-using NVorbis;
-using NAudio;
-using NAudio.Wave;
-using NAudio.Wave.SampleProviders;
+//using NVorbis;
+//using NAudio;
+//using NAudio.Wave;
+//using NAudio.Wave.SampleProviders;
 using CosmosWar.AIScripts;
 
 namespace CosmosWar
@@ -78,7 +78,7 @@ namespace CosmosWar
         public static void GameInit(IntPtr handle)
         {
             hWnd = handle;
-            Logger.DebugWindowVisible = true;
+            Logger.DebugWindowVisible = false;
             gameWindow = (Form)Control.FromHandle(hWnd);
             gameWindow.BackgroundImageLayout = ImageLayout.Stretch;
             gameWindow.Text = $"{Define.GameName} {Define.GameVersion}----{Define.GameDescription}";
@@ -90,7 +90,7 @@ namespace CosmosWar
                 (Screen.PrimaryScreen.WorkingArea.Height - Define.GameWindowHeight) / 2);
             CurrentScene = GameScene.Entry;
             gameWindow.KeyDown += GameWindowKeyDown;
-            bgmDevice = new WaveOutEvent(); // Create device
+            //bgmDevice = new WaveOutEvent(); // Create device
             //Console.WriteLine();
             timer = new System.Timers.Timer
             {
@@ -337,6 +337,9 @@ namespace CosmosWar
         public static void StagesDefine()
         {
             map1 = Map.FromFile(Properties.Resources.Area1);
+            map2 = Map.FromFile(Properties.Resources.Area2);
+            map3 = Map.FromFile(Properties.Resources.Area3);
+            map4 = Map.FromFile(Properties.Resources.Area4);
             //Logger.Log(map1);
         }
 
@@ -392,9 +395,9 @@ namespace CosmosWar
         private static byte gameOption = 0;
         private static Form gameWindow = null;
         //private static readonly CSAudioPlayer.AudioPlayer audioPlayer = new CSAudioPlayer.AudioPlayer();
-        private static IWavePlayer bgmDevice = null;
-        private static AudioFileReader _reader = null;
-        private static VolumeSampleProvider _volumeProvider = null;
+        //private static IWavePlayer bgmDevice = null;
+        //private static AudioFileReader _reader = null;
+        //private static VolumeSampleProvider _volumeProvider = null;
         private static Scene areaSystem => Scene.Instance;
 
         private static Map map1 = null;
@@ -408,7 +411,7 @@ namespace CosmosWar
         private static System.Timers.Timer timer = null;
         private static System.Timers.Timer periodTimer = null;
         private static readonly List<FrequencyAction> actionList = new List<FrequencyAction>();
-        private static readonly int[] allowFrequency = new int[] { 50, 25, 20, 10, 5, 2 };
+        private static readonly int[] allowFrequency = new int[] { 50, 40, 25, 20, 10, 5, 2 };
         // warningMsg
         private static int warningMsgSec = 0;
         private static string warningMsg = string.Empty;

@@ -65,26 +65,7 @@ namespace CosmosWar
         /// <returns></returns>
         public static List<Point> GetUnitRoundTiles(Unit u)
         {
-            List<Point> points = new List<Point>();
-            Size size = Scene.CurrentMapSize;
-            if(size.Width * size.Height == 0) return points;
-            byte gX = u.GridLocX;
-            byte gY = u.GridLocY;
-            byte range = (byte)(u.Move * 2 + 1);
-            byte maxX = (byte)(gX + range);
-            byte maxY = (byte)(gY + range);
-            for (int i = gX - u.Move; i < maxX; i++)
-            {
-                if (i < 0 || i >= size.Width) continue;
-                for (int j = gY - u.Move; j < maxY; j++)
-                {
-                    if(j < 0 || j >= size.Height) continue;
-                    //if (Math.Abs(i - gX) + Math.Abs(j - gY) > u.Move) continue;
-                    if (GetGridRouteLen(i, j, gX, gY) > u.Move) continue;
-                    points.Add(new Point(i, j));
-                }
-            }
-            return points;
+            return GetUnitRoundTiles(u.GridLocX, u.GridLocY, u.Move);
         }
 
         /// <summary>
@@ -134,6 +115,31 @@ namespace CosmosWar
         }
 
         /// <summary>
+        /// 根据EX技能获取范围内所有敌方单位
+        /// </summary>
+        /// <param name="unit"></param>
+        /// <returns></returns>
+        public static IEnumerable<Unit> GetEnemysByEXSkillCastRange(Unit unit)
+        {
+            if(unit == null || unit.EXSkill.Equals(EXSkill.None))
+                return Enumerable.Empty<Unit>();
+            EXSkill ex = unit.EXSkill;
+            var tiles = GetUnitRoundTiles(unit.GridLocX, unit.GridLocY, ex.AttackRange);
+            List<Unit> outputs = new List<Unit>();
+            foreach(var tile in tiles)
+            {
+                var tempUnits = Scene.Instance.FindUnits((byte)tile.X, (byte)tile.Y);
+                if (tempUnits.Count() == 0)
+                    continue;
+                var tempUnit = tempUnits.FirstOrDefault(x => !x.IsHome && !x.IsFactory && x.Force != unit.Force);
+                if (tempUnit == null)
+                    continue;
+                outputs.Add(tempUnit);
+            }
+            return outputs;
+        }
+
+        /// <summary>
         /// 根据基础攻击
         /// </summary>
         /// <param name="baseDamage"></param>
@@ -151,6 +157,60 @@ namespace CosmosWar
             }
             dmg = dmg < 0 ? 0 : dmg;
             return dmg;
+        }
+
+        /// <summary>
+        /// 根据坐标和行动点数（范围）获取可移动格子
+        /// </summary>
+        /// <param name="gX"></param>
+        /// <param name="gY"></param>
+        /// <param name="move"></param>
+        /// <returns></returns>
+        public static List<Point> GetUnitRoundTiles(byte gX, byte gY, int move)
+        {
+            List<Point> points = new List<Point>();
+            Size size = Scene.CurrentMapSize;
+            byte range = (byte)(move * 2 + 1);
+            byte maxX = (byte)(gX + range);
+            byte maxY = (byte)(gY + range);
+            for (int i = gX - move; i < maxX; i++)
+            {
+                if (i < 0 || i >= size.Width) continue;
+                for (int j = gY - move; j < maxY; j++)
+                {
+                    if (j < 0 || j >= size.Height) continue;
+                    //if (Math.Abs(i - gX) + Math.Abs(j - gY) > u.Move) continue;
+                    if (GetGridRouteLen(i, j, gX, gY) > move) continue;
+                    points.Add(new Point(i, j));
+                }
+            }
+            return points;
+        }
+
+        /// <summary>
+        /// 获取两点间角度
+        /// </summary>
+        /// <param name="x0"></param>
+        /// <param name="y0"></param>
+        /// <param name="x1"></param>
+        /// <param name="y1"></param>
+        /// <returns></returns>
+        public static double GetAngleBetweenPoints(float x0,float y0,float x1,float y1)
+        {
+            return Math.Atan2(y0 - y1, x1 - x0);
+        }
+
+        /// <summary>
+        /// 获取绝对坐标比值
+        /// </summary>
+        /// <param name="x0"></param>
+        /// <param name="y0"></param>
+        /// <param name="x1"></param>
+        /// <param name="y1"></param>
+        /// <returns></returns>
+        public static double GetAbsSlope(float x0,float y0,float x1,float y1)
+        {
+            return Math.Abs(y1 - y0) / Math.Abs(x1 - x0);
         }
 
         private static Random random = new Random();
