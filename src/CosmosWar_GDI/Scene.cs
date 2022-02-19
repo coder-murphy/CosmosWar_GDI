@@ -454,13 +454,15 @@ namespace CosmosWar
                     }
                     if (isFactoryRunning)
                     {
-                        if(currentSelectedUnit.unit.Force == OurForce)
+                        if (currentSelectedUnit.unit.Force == OurForce)
+                        {
                             if (!currentSelectedUnit.unit.IsThisRoundMoved)
                                 OrderFactoryBuildUnit();
                             else
                             {
                                 SetFactoryModeDisabled();
                             }
+                        }
                         renderFlag = true;
                     }
                     else if (isUnitMoving)
@@ -1280,7 +1282,14 @@ namespace CosmosWar
                 Logger.Log(u.Name);
                 if (u.IsFactory)
                 {
-                    if(u.IsThisRoundMoved)
+                    if (manufactureUnitTypesB.Min(x => x.Cost) > GoldB)
+                    {
+                        Game.SetWarningMessage("金钱不足以生产最低\r\n价格的单位，无法生产。", 2);
+                        u.IsThisRoundMoved = true;
+                        SetFactoryModeDisabled();
+                        CheckRoundEnd();
+                    }
+                    else if (u.IsThisRoundMoved)
                     {
                         Game.SetWarningMessage("无法生产。", 2);
                         isFactoryRunning = true;
